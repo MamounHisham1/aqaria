@@ -32,7 +32,7 @@ class StoreListingRequest extends FormRequest
             'is_featured' => 'boolean',
             'is_active' => 'boolean',
             'images' => 'nullable|array|max:10',
-            'images.*' => 'string|max:500',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
             'amenities' => 'nullable|array|max:20',
             'amenities.*' => 'string|max:100',
         ];

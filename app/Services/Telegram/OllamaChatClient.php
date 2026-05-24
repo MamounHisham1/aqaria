@@ -25,13 +25,19 @@ class OllamaChatClient implements ChatClient
         }
 
         try {
+            ob_start();
+
             $response = Http::timeout(120)
                 ->post("{$baseUrl}/api/chat", $payload);
+
+            ob_end_clean();
 
             $response->throw();
 
             $data = $response->json();
         } catch (\Exception $e) {
+            ob_end_clean();
+
             Log::error('Ollama request failed', [
                 'error' => $e->getMessage(),
                 'model' => $model,
@@ -53,7 +59,7 @@ class OllamaChatClient implements ChatClient
             $arguments = $function['arguments'] ?? [];
 
             $normalizedToolCalls[] = [
-                'id' => 'call_' . ($index + 1),
+                'id' => 'call_'.($index + 1),
                 'type' => 'function',
                 'function' => [
                     'name' => $function['name'] ?? '',

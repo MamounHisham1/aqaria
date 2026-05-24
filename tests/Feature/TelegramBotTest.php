@@ -1,7 +1,11 @@
 <?php
 
 use App\Models\Listing;
+use App\Models\TelegramMessage;
 use App\Models\TelegramUser;
+use App\Services\Telegram\AiAssistantService;
+use App\Services\Telegram\AuthorizationService;
+use App\Services\Telegram\Contracts\ChatClient;
 use App\Services\Telegram\ConversationContext;
 use App\Services\Telegram\ListingToolService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,6 +15,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     config()->set('services.telegram.bot_token', 'test-token');
+    config()->set('services.telegram.webhook_secret', 'test-secret');
 });
 
 // ========== Webhook /start ==========
@@ -31,13 +36,15 @@ test('webhook handles start command for new user and logs message', function () 
         ],
     ];
 
-    $response = $this->postJson(route('telegram.webhook'), $payload);
+    $response = $this->postJson(route('telegram.webhook'), $payload, [
+        'X-Telegram-Bot-Api-Secret-Token' => 'test-secret',
+    ]);
 
     $response->assertOk();
 
     expect(TelegramUser::where('telegram_id', '123456')->exists())->toBeTrue();
 
-    $message = \App\Models\TelegramMessage::query()
+    $message = TelegramMessage::query()
         ->where('telegram_chat_id', '123456')
         ->where('telegram_message_id', '42')
         ->first();
@@ -72,7 +79,9 @@ test('webhook clears conversation context', function () {
         ],
     ];
 
-    $this->postJson(route('telegram.webhook'), $payload)->assertOk();
+    $this->postJson(route('telegram.webhook'), $payload, [
+        'X-Telegram-Bot-Api-Secret-Token' => 'test-secret',
+    ])->assertOk();
 
     expect($context->getMessages($chatId))->toBeEmpty();
 });
@@ -80,7 +89,7 @@ test('webhook clears conversation context', function () {
 // ========== AI Message Processing ==========
 
 test('webhook processes message through ai and sends response', function () {
-    $mockClient = new class implements \App\Services\Telegram\Contracts\ChatClient
+    $mockClient = new class implements ChatClient
     {
         public function create(array $params): array
         {
@@ -98,7 +107,7 @@ test('webhook processes message through ai and sends response', function () {
         }
     };
 
-    app()->bind(\App\Services\Telegram\Contracts\ChatClient::class, fn() => $mockClient);
+    app()->bind(ChatClient::class, fn () => $mockClient);
 
     Http::fake([
         'api.telegram.org/*' => Http::response(['ok' => true], 200),
@@ -117,7 +126,9 @@ test('webhook processes message through ai and sends response', function () {
         ],
     ];
 
-    $response = $this->postJson(route('telegram.webhook'), $payload);
+    $response = $this->postJson(route('telegram.webhook'), $payload, [
+        'X-Telegram-Bot-Api-Secret-Token' => 'test-secret',
+    ]);
 
     $response->assertOk();
 
@@ -135,7 +146,7 @@ test('webhook executes tool calls when ai requests them', function () {
         'price' => 5000000,
     ]);
 
-    $mockClient = new class implements \App\Services\Telegram\Contracts\ChatClient
+    $mockClient = new class implements ChatClient
     {
         private int $count = 0;
 
@@ -179,7 +190,7 @@ test('webhook executes tool calls when ai requests them', function () {
         }
     };
 
-    app()->bind(\App\Services\Telegram\Contracts\ChatClient::class, fn() => $mockClient);
+    app()->bind(ChatClient::class, fn () => $mockClient);
 
     Http::fake([
         'api.telegram.org/*' => Http::response(['ok' => true], 200),
@@ -198,7 +209,9 @@ test('webhook executes tool calls when ai requests them', function () {
         ],
     ];
 
-    $response = $this->postJson(route('telegram.webhook'), $payload);
+    $response = $this->postJson(route('telegram.webhook'), $payload, [
+        'X-Telegram-Bot-Api-Secret-Token' => 'test-secret',
+    ]);
 
     $response->assertOk();
 
@@ -210,7 +223,7 @@ test('webhook executes tool calls when ai requests them', function () {
 // ========== Authorization ==========
 
 test('unauthorized user cannot trigger create_listing tool', function () {
-    $toolService = new ListingToolService();
+    $toolService = new ListingToolService;
 
     $result = $toolService->createListing([
         'title' => 'Test',
@@ -233,10 +246,10 @@ test('unauthorized user cannot trigger create_listing tool', function () {
 
 test('openai service restricts modify tools for non-admin users', function () {
     $user = TelegramUser::factory()->create(['is_authorized' => false, 'role' => 'user']);
-    $toolService = new ListingToolService();
-    $context = new ConversationContext();
-    $mockClient = Mockery::mock(\App\Services\Telegram\Contracts\ChatClient::class);
-    $service = new \App\Services\Telegram\AiAssistantService($toolService, $context, $mockClient);
+    $toolService = new ListingToolService;
+    $context = new ConversationContext;
+    $mockClient = Mockery::mock(ChatClient::class);
+    $service = new AiAssistantService($toolService, $context, $mockClient);
 
     $reflection = new ReflectionClass($service);
     $method = $reflection->getMethod('getTools');
@@ -252,10 +265,10 @@ test('openai service restricts modify tools for non-admin users', function () {
 
 test('openai service includes modify tools for admin users', function () {
     $user = TelegramUser::factory()->authorized()->create();
-    $toolService = new ListingToolService();
-    $context = new ConversationContext();
-    $mockClient = Mockery::mock(\App\Services\Telegram\Contracts\ChatClient::class);
-    $service = new \App\Services\Telegram\AiAssistantService($toolService, $context, $mockClient);
+    $toolService = new ListingToolService;
+    $context = new ConversationContext;
+    $mockClient = Mockery::mock(ChatClient::class);
+    $service = new AiAssistantService($toolService, $context, $mockClient);
 
     $reflection = new ReflectionClass($service);
     $method = $reflection->getMethod('getTools');
@@ -275,7 +288,7 @@ test('search_listings filters by city', function () {
     Listing::factory()->count(3)->create(['city' => 'Cairo', 'is_active' => true]);
     Listing::factory()->count(2)->create(['city' => 'Alexandria', 'is_active' => true]);
 
-    $service = new ListingToolService();
+    $service = new ListingToolService;
     $result = $service->searchListings(['city' => 'Cairo']);
 
     expect($result['count'])->toBe(3);
@@ -285,14 +298,14 @@ test('search_listings respects is_active filter', function () {
     Listing::factory()->count(2)->create(['is_active' => true]);
     Listing::factory()->count(3)->create(['is_active' => false]);
 
-    $service = new ListingToolService();
+    $service = new ListingToolService;
     $result = $service->searchListings([]);
 
     expect($result['count'])->toBe(2);
 });
 
 test('create_listing validates required fields', function () {
-    $service = new ListingToolService();
+    $service = new ListingToolService;
     $result = $service->createListing(['title' => 'Only Title']);
 
     expect($result['success'])->toBeFalse();
@@ -302,7 +315,7 @@ test('create_listing validates required fields', function () {
 test('update_listing modifies existing listing', function () {
     $listing = Listing::factory()->create(['price' => 1000000, 'title' => 'Old Title']);
 
-    $service = new ListingToolService();
+    $service = new ListingToolService;
     $result = $service->updateListing([
         'id' => $listing->id,
         'price' => 2200000,
@@ -313,7 +326,7 @@ test('update_listing modifies existing listing', function () {
 });
 
 test('update_listing returns error for missing id', function () {
-    $service = new ListingToolService();
+    $service = new ListingToolService;
     $result = $service->updateListing(['title' => 'New Title']);
 
     expect($result['success'])->toBeFalse();
@@ -323,7 +336,7 @@ test('update_listing returns error for missing id', function () {
 test('delete_listing removes listing', function () {
     $listing = Listing::factory()->create();
 
-    $service = new ListingToolService();
+    $service = new ListingToolService;
     $result = $service->deleteListing($listing->id);
 
     expect($result['success'])->toBeTrue();
@@ -331,7 +344,7 @@ test('delete_listing removes listing', function () {
 });
 
 test('delete_listing returns error for missing listing', function () {
-    $service = new ListingToolService();
+    $service = new ListingToolService;
     $result = $service->deleteListing(99999);
 
     expect($result['success'])->toBeFalse();
@@ -341,7 +354,7 @@ test('delete_listing returns error for missing listing', function () {
 // ========== ConversationContext ==========
 
 test('conversation context stores and retrieves messages', function () {
-    $context = new ConversationContext();
+    $context = new ConversationContext;
     $chatId = 'chat_123';
 
     $context->addMessage($chatId, 'user', 'Hello');
@@ -355,7 +368,7 @@ test('conversation context stores and retrieves messages', function () {
 });
 
 test('conversation context limits message history', function () {
-    $context = new ConversationContext();
+    $context = new ConversationContext;
     $chatId = 'chat_456';
 
     for ($i = 0; $i < 25; $i++) {
@@ -368,7 +381,7 @@ test('conversation context limits message history', function () {
 });
 
 test('conversation context tracks last listing id', function () {
-    $context = new ConversationContext();
+    $context = new ConversationContext;
     $chatId = 'chat_789';
 
     $context->setLastListingId($chatId, 42);
@@ -377,7 +390,9 @@ test('conversation context tracks last listing id', function () {
 });
 
 test('webhook ignores non-message updates', function () {
-    $response = $this->postJson(route('telegram.webhook'), ['update_id' => 1]);
+    $response = $this->postJson(route('telegram.webhook'), ['update_id' => 1], [
+        'X-Telegram-Bot-Api-Secret-Token' => 'test-secret',
+    ]);
 
     $response->assertOk();
     expect($response->json('status'))->toBe('ignored');
@@ -386,7 +401,7 @@ test('webhook ignores non-message updates', function () {
 // ========== AuthorizationService ==========
 
 test('authorization service creates new telegram user', function () {
-    $service = new \App\Services\Telegram\AuthorizationService();
+    $service = new AuthorizationService;
 
     $user = $service->findOrCreateUser([
         'id' => 999999,
@@ -406,7 +421,7 @@ test('authorization service updates existing user on re-entry', function () {
         'username' => 'old_name',
     ]);
 
-    $service = new \App\Services\Telegram\AuthorizationService();
+    $service = new AuthorizationService;
 
     $user = $service->findOrCreateUser([
         'id' => 888888,

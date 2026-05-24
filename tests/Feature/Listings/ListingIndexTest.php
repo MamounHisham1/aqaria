@@ -19,13 +19,13 @@ test('listings index page returns all active listings', function () {
     $response = $this->get(route('listings.index'));
 
     $response->assertOk();
-    $response->assertInertia(fn($page) => $page->has('listings.data'));
+    $response->assertInertia(fn ($page) => $page->has('listings.data'));
 });
 
 test('listings index page returns correct pagination count', function () {
     $response = $this->get(route('listings.index'));
 
-    $response->assertInertia(fn($page) => $page->where('listings.total', 10)); // 10 active
+    $response->assertInertia(fn ($page) => $page->where('listings.total', 10)); // 10 active
 });
 
 // ========== Search ==========
@@ -40,13 +40,13 @@ test('search filters listings by keyword', function () {
 
     $response = $this->get(route('listings.index', ['q' => 'Beach']));
 
-    $response->assertInertia(fn($page) => $page->where('listings.total', 1));
+    $response->assertInertia(fn ($page) => $page->where('listings.total', 1));
 });
 
 test('search returns no results for non-matching term', function () {
     $response = $this->get(route('listings.index', ['q' => 'xyznotfound']));
 
-    $response->assertInertia(fn($page) => $page->where('listings.total', 0));
+    $response->assertInertia(fn ($page) => $page->where('listings.total', 0));
 });
 
 // ========== City Filter ==========
@@ -54,13 +54,13 @@ test('search returns no results for non-matching term', function () {
 test('filters listings by city', function () {
     $response = $this->get(route('listings.index', ['city' => 'Cairo']));
 
-    $response->assertInertia(fn($page) => $page->where('listings.total', 5));
+    $response->assertInertia(fn ($page) => $page->where('listings.total', 5));
 });
 
 test('filters listings by different city', function () {
     $response = $this->get(route('listings.index', ['city' => 'Alexandria']));
 
-    $response->assertInertia(fn($page) => $page->where('listings.total', 3));
+    $response->assertInertia(fn ($page) => $page->where('listings.total', 3));
 });
 
 // ========== Listing Type Filter ==========
@@ -68,13 +68,13 @@ test('filters listings by different city', function () {
 test('filters listings by listing type', function () {
     $response = $this->get(route('listings.index', ['listing_type' => 'sale']));
 
-    $response->assertInertia(fn($page) => $page->where('listings.total', 7));
+    $response->assertInertia(fn ($page) => $page->where('listings.total', 7));
 });
 
 test('filters listings by rent type', function () {
     $response = $this->get(route('listings.index', ['listing_type' => 'rent']));
 
-    $response->assertInertia(fn($page) => $page->where('listings.total', 3));
+    $response->assertInertia(fn ($page) => $page->where('listings.total', 3));
 });
 
 // ========== Property Type Filter ==========
@@ -82,7 +82,7 @@ test('filters listings by rent type', function () {
 test('filters listings by property type', function () {
     $response = $this->get(route('listings.index', ['property_type' => 'villa']));
 
-    $response->assertInertia(fn($page) => $page->where('listings.total', 3));
+    $response->assertInertia(fn ($page) => $page->where('listings.total', 3));
 });
 
 // ========== Combined Filters ==========
@@ -94,7 +94,7 @@ test('combines multiple filters correctly', function () {
         'property_type' => 'apartment',
     ]));
 
-    $response->assertInertia(fn($page) => $page->where('listings.total', 5));
+    $response->assertInertia(fn ($page) => $page->where('listings.total', 5));
 });
 
 // ========== Price Range ==========
@@ -106,7 +106,8 @@ test('filters by minimum price', function () {
 
     $response = $this->get(route('listings.index', ['min_price' => 500000]));
 
-    $response->assertInertia(fn($page) => $page->where('listings.total', 12)); // 10 existing (prices vary) + 2 new with price >= 500000
+    $totalAbove = Listing::where('is_active', true)->where('price', '>=', 500000)->count();
+    $response->assertInertia(fn ($page) => $page->where('listings.total', $totalAbove));
 });
 
 // ========== Bedrooms Filter ==========
@@ -114,7 +115,7 @@ test('filters by minimum price', function () {
 test('filters by minimum bedrooms', function () {
     $response = $this->get(route('listings.index', ['bedrooms' => 4]));
 
-    $response->assertInertia(fn($page) => $page->where('listings.total', 3)); // 3 with 5 bedrooms
+    $response->assertInertia(fn ($page) => $page->where('listings.total', 3)); // 3 with 5 bedrooms
 });
 
 // ========== Pagination ==========
@@ -125,7 +126,7 @@ test('paginates listing results', function () {
     $response = $this->get(route('listings.index'));
 
     $response->assertInertia(
-        fn($page) => $page
+        fn ($page) => $page
             ->where('listings.per_page', 12)
             ->where('listings.total', 40)
     );
@@ -136,14 +137,14 @@ test('paginates listing results', function () {
 test('sorts by newest first by default', function () {
     $response = $this->get(route('listings.index'));
 
-    $response->assertInertia(fn($page) => $page->has('listings.data'));
+    $response->assertInertia(fn ($page) => $page->has('listings.data'));
 });
 
 test('sorts by price ascending', function () {
     $response = $this->get(route('listings.index', ['sort' => 'price_asc']));
 
     $response->assertOk();
-    $response->assertInertia(fn($page) => $page->has('listings.data'));
+    $response->assertInertia(fn ($page) => $page->has('listings.data'));
 });
 
 test('sorts by area descending', function () {
@@ -158,7 +159,7 @@ test('index returns filter options in response', function () {
     $response = $this->get(route('listings.index'));
 
     $response->assertInertia(
-        fn($page) => $page
+        fn ($page) => $page
             ->has('filterOptions.cities')
             ->has('filterOptions.propertyTypes')
             ->has('filterOptions.listingTypes')
@@ -175,7 +176,7 @@ test('preserves applied filters in response', function () {
     ]));
 
     $response->assertInertia(
-        fn($page) => $page
+        fn ($page) => $page
             ->where('filters.q', 'Cairo')
             ->where('filters.city', 'Cairo')
             ->where('filters.listing_type', 'sale')

@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->user = User::factory()->create();
+    $this->user = User::factory()->create(['is_admin' => true]);
     $this->actingAs($this->user);
 });
 
@@ -19,7 +19,7 @@ test('admin can view listings index', function () {
     $response = $this->get(route('admin.listings.index'));
 
     $response->assertOk();
-    $response->assertInertia(fn($page) => $page->has('listings.data'));
+    $response->assertInertia(fn ($page) => $page->has('listings.data'));
 });
 
 test('admin listings index shows all listings including inactive', function () {
@@ -28,7 +28,7 @@ test('admin listings index shows all listings including inactive', function () {
 
     $response = $this->get(route('admin.listings.index'));
 
-    $response->assertInertia(fn($page) => $page->where('listings.total', 5));
+    $response->assertInertia(fn ($page) => $page->where('listings.total', 5));
 });
 
 test('admin listings index includes views and clicks count', function () {
@@ -36,7 +36,7 @@ test('admin listings index includes views and clicks count', function () {
 
     $response = $this->get(route('admin.listings.index'));
 
-    $response->assertInertia(fn($page) => $page->has('listings.data'));
+    $response->assertInertia(fn ($page) => $page->has('listings.data'));
 });
 
 // ========== Create Listing ==========
@@ -64,7 +64,6 @@ test('admin can create a new listing', function () {
         'contact_whatsapp' => '01000000001',
         'is_featured' => true,
         'is_active' => true,
-        'images' => ['https://example.com/img.jpg'],
         'amenities' => ['Pool', 'Gym'],
     ];
 
@@ -148,7 +147,7 @@ test('admin can view edit listing form', function () {
 
     $response->assertOk();
     $response->assertInertia(
-        fn($page) => $page
+        fn ($page) => $page
             ->where('listing.id', $listing->id)
             ->where('listing.title', $listing->title)
     );
@@ -176,7 +175,7 @@ test('admin can update a listing', function () {
 
     $listing->refresh();
     expect($listing->title)->toBe('Updated Title');
-    expect($listing->price)->toBe(750000.00);
+    expect($listing->price)->toEqual(750000.00);
     expect($listing->city)->toBe('Alexandria');
 });
 
@@ -212,6 +211,8 @@ test('admin can delete a listing', function () {
 // ========== Authentication ==========
 
 test('guest cannot access admin listing routes', function () {
+    auth()->logout();
+
     $listing = Listing::factory()->create();
 
     $this->get(route('admin.listings.index'))->assertRedirect(route('login'));

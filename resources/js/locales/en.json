@@ -173,5 +173,7 @@
     "amenities": "Amenities",
     "similar_properties_in": "Similar Properties in {city}",
     "interested_in_property": "Interested in this property?",
-    "property_details": "Property Details"
+    "property_details": "Property Details",
+    "add_amenity": "Add amenity",
+    "remove_amenity": "Remove"
 }

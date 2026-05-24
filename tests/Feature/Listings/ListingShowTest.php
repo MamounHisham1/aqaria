@@ -1,13 +1,17 @@
 <?php
 
+use App\Http\Middleware\SetVisitorId;
 use App\Models\Listing;
 use App\Models\ListingClick;
 use App\Models\ListingView;
+use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    EncryptCookies::except(['visitor_id']);
+
     $this->listing = Listing::factory()->create([
         'is_active' => true,
         'city' => 'Cairo',
@@ -25,7 +29,7 @@ test('show page returns listing detail', function () {
 
     $response->assertOk();
     $response->assertInertia(
-        fn($page) => $page
+        fn ($page) => $page
             ->has('listing')
             ->where('listing.id', $this->listing->id)
             ->where('listing.title', $this->listing->title)
@@ -39,7 +43,7 @@ test('show page returns related listings from same city', function () {
     $response = $this->get(route('listings.show', $this->listing));
 
     $response->assertInertia(
-        fn($page) => $page
+        fn ($page) => $page
             ->has('relatedListings', 3)
     );
 });
@@ -55,7 +59,9 @@ test('show page returns 404 for inactive listing', function () {
 test('show page records a view for the listing', function () {
     $visitorId = bin2hex(random_bytes(16));
 
-    $response = $this->withCookie('visitor_id', $visitorId)
+    $this->withoutMiddleware([SetVisitorId::class]);
+
+    $response = $this->withUnencryptedCookies(['visitor_id' => $visitorId])
         ->get(route('listings.show', $this->listing));
 
     $response->assertOk();
@@ -66,10 +72,11 @@ test('show page records a view for the listing', function () {
 
 test('show page deduplicates views within 24 hours', function () {
     $visitorId = bin2hex(random_bytes(16));
+    $this->withoutMiddleware([SetVisitorId::class]);
 
-    $this->withCookie('visitor_id', $visitorId)
+    $this->withUnencryptedCookies(['visitor_id' => $visitorId])
         ->get(route('listings.show', $this->listing));
-    $this->withCookie('visitor_id', $visitorId)
+    $this->withUnencryptedCookies(['visitor_id' => $visitorId])
         ->get(route('listings.show', $this->listing));
 
     expect(ListingView::where('listing_id', $this->listing->id)->count())->toBe(1);
@@ -78,10 +85,11 @@ test('show page deduplicates views within 24 hours', function () {
 test('show page allows views from different visitors', function () {
     $visitorA = bin2hex(random_bytes(16));
     $visitorB = bin2hex(random_bytes(16));
+    $this->withoutMiddleware([SetVisitorId::class]);
 
-    $this->withCookie('visitor_id', $visitorA)
+    $this->withUnencryptedCookies(['visitor_id' => $visitorA])
         ->get(route('listings.show', $this->listing));
-    $this->withCookie('visitor_id', $visitorB)
+    $this->withUnencryptedCookies(['visitor_id' => $visitorB])
         ->get(route('listings.show', $this->listing));
 
     expect(ListingView::where('listing_id', $this->listing->id)->count())->toBe(2);
@@ -91,8 +99,10 @@ test('show page allows views from different visitors', function () {
 
 test('recordClick records a phone click', function () {
     $visitorId = bin2hex(random_bytes(16));
+    $this->withoutMiddleware([SetVisitorId::class]);
+    $this->withCredentials();
 
-    $response = $this->withCookie('visitor_id', $visitorId)
+    $response = $this->withUnencryptedCookies(['visitor_id' => $visitorId])
         ->postJson(route('listings.click', $this->listing), [
             'click_type' => 'phone',
         ]);
@@ -106,7 +116,10 @@ test('recordClick records a phone click', function () {
 });
 
 test('recordClick records a whatsapp click', function () {
-    $this->withCookie('visitor_id', bin2hex(random_bytes(16)))
+    $this->withoutMiddleware([SetVisitorId::class]);
+    $this->withCredentials();
+
+    $this->withUnencryptedCookies(['visitor_id' => bin2hex(random_bytes(16))])
         ->postJson(route('listings.click', $this->listing), [
             'click_type' => 'whatsapp',
         ])
@@ -116,7 +129,10 @@ test('recordClick records a whatsapp click', function () {
 });
 
 test('recordClick records a detail click', function () {
-    $this->withCookie('visitor_id', bin2hex(random_bytes(16)))
+    $this->withoutMiddleware([SetVisitorId::class]);
+    $this->withCredentials();
+
+    $this->withUnencryptedCookies(['visitor_id' => bin2hex(random_bytes(16))])
         ->postJson(route('listings.click', $this->listing), [
             'click_type' => 'detail',
         ])
@@ -126,18 +142,16 @@ test('recordClick records a detail click', function () {
 });
 
 test('recordClick validates click_type is required', function () {
-    $response = $this->withCookie('visitor_id', bin2hex(random_bytes(16)))
-        ->postJson(route('listings.click', $this->listing), []);
+    $response = $this->postJson(route('listings.click', $this->listing), []);
 
     $response->assertStatus(422);
     $response->assertJsonValidationErrors(['click_type']);
 });
 
 test('recordClick validates click_type is valid enum', function () {
-    $response = $this->withCookie('visitor_id', bin2hex(random_bytes(16)))
-        ->postJson(route('listings.click', $this->listing), [
-            'click_type' => 'invalid',
-        ]);
+    $response = $this->postJson(route('listings.click', $this->listing), [
+        'click_type' => 'invalid',
+    ]);
 
     $response->assertStatus(422);
     $response->assertJsonValidationErrors(['click_type']);
@@ -161,7 +175,7 @@ test('show page includes views and clicks count', function () {
     $response = $this->get(route('listings.show', $this->listing));
 
     $response->assertInertia(
-        fn($page) => $page
+        fn ($page) => $page
             ->where('listing.views_count', 5)
             ->where('listing.clicks_count', 3)
     );
@@ -171,7 +185,7 @@ test('show page includes listing amenities and images', function () {
     $response = $this->get(route('listings.show', $this->listing));
 
     $response->assertInertia(
-        fn($page) => $page
+        fn ($page) => $page
             ->where('listing.images', ['https://example.com/img1.jpg', 'https://example.com/img2.jpg'])
             ->where('listing.amenities', ['Pool', 'Gym', 'Parking'])
     );

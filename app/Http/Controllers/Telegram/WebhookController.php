@@ -9,6 +9,7 @@ use App\Services\Telegram\AuthorizationService;
 use App\Services\Telegram\ConversationContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
@@ -17,11 +18,15 @@ class WebhookController extends Controller
         private AuthorizationService $authService,
         private AiAssistantService $aiService,
         private ConversationContext $context,
-    ) {
-    }
+    ) {}
 
     public function handle(Request $request): JsonResponse
     {
+        $secret = $request->header('X-Telegram-Bot-Api-Secret-Token');
+        if ($secret !== config('services.telegram.webhook_secret')) {
+            abort(403);
+        }
+
         $update = $request->all();
 
         if (empty($update['message'])) {
@@ -50,12 +55,15 @@ class WebhookController extends Controller
             ]);
 
             if (strtolower(trim($text)) === '/start') {
-                return $this->sendWelcome($chatId, $user);
+                $this->sendWelcome($chatId, $user);
+
+                return response()->json(['status' => 'ok']);
             }
 
             if (strtolower(trim($text)) === '/clear') {
                 $this->context->clear($chatId);
                 $this->sendTelegramMessage($chatId, 'Conversation context cleared. How can I help you?');
+
                 return response()->json(['status' => 'ok']);
             }
 
@@ -74,20 +82,18 @@ class WebhookController extends Controller
         return response()->json(['status' => 'ok']);
     }
 
-    private function sendWelcome(string $chatId, $user): JsonResponse
+    private function sendWelcome(string $chatId, $user): void
     {
         $name = $user->first_name ?? 'there';
         $adminHint = $user->isAdmin() ? "\n\nYou have admin privileges — you can create, update, and delete listings." : '';
 
         $message = "Hello {$name}! I'm your real estate assistant. I can help you:\n"
-            . "\u{2022} Search and view property listings\n"
-            . "\u{2022} Get details about specific listings\n"
-            . "{$adminHint}\n\n"
-            . "Just tell me what you'd like to do!";
+            ."\u{2022} Search and view property listings\n"
+            ."\u{2022} Get details about specific listings\n"
+            ."{$adminHint}\n\n"
+            ."Just tell me what you'd like to do!";
 
         $this->sendTelegramMessage($chatId, $message);
-
-        return response()->json(['status' => 'ok']);
     }
 
     private function sendTelegramMessage(string $chatId, string $text): void
@@ -96,11 +102,12 @@ class WebhookController extends Controller
 
         if (empty($token)) {
             Log::warning('Telegram bot token not configured');
+
             return;
         }
 
         try {
-            \Illuminate\Support\Facades\Http::post(
+            Http::post(
                 "https://api.telegram.org/bot{$token}/sendMessage",
                 [
                     'chat_id' => $chatId,

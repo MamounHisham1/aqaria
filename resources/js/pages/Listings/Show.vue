@@ -263,7 +263,7 @@ const propertyTypeKey = (type: string) => {
                                 </a>
                                 <a
                                     v-if="listing.contact_whatsapp"
-                                    :href="`https://wa.me/2${listing.contact_whatsapp}`"
+                                    :href="`https://wa.me/${listing.contact_whatsapp}`"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     @click="trackClick('whatsapp')"

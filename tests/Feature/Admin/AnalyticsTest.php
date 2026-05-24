@@ -9,7 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->user = User::factory()->create();
+    $this->user = User::factory()->create(['is_admin' => true]);
     $this->actingAs($this->user);
 });
 

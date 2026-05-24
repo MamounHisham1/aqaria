@@ -15,16 +15,20 @@ class SetVisitorId
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->cookie('visitor_id')) {
+        $visitorId = $request->cookie('visitor_id');
+
+        if (! $visitorId) {
             $visitorId = bin2hex(random_bytes(16));
 
             $response = $next($request);
 
-            return $response->withCookie(cookie(
+            $response->withCookie(cookie(
                 'visitor_id',
                 $visitorId,
                 30 * 24 * 60 // 30 days
             ));
+
+            return $response;
         }
 
         return $next($request);

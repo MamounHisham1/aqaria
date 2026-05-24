@@ -11,23 +11,27 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__ . '/../routes/web.php',
-        commands: __DIR__ . '/../routes/console.php',
+        web: __DIR__.'/../routes/web.php',
+        commands: __DIR__.'/../routes/console.php',
         health: '/up',
         then: function () {
-            require __DIR__ . '/../routes/telegram.php';
+            require __DIR__.'/../routes/telegram.php';
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias(['admin' => EnsureIsAdmin::class]);
 
-        $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+        $middleware->encryptCookies(except: ['appearance', 'sidebar_state', 'visitor_id']);
 
         $middleware->web(append: [
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
             SetVisitorId::class,
+        ]);
+
+        $middleware->preventRequestsDuringMaintenance(except: [
+            '/telegram/webhook',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

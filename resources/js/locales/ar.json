@@ -173,5 +173,7 @@
     "amenities": "المرافق والمميزات",
     "similar_properties_in": "عقارات مشابهة في {city}",
     "interested_in_property": "مهتم بهذا العقار؟",
-    "property_details": "تفاصيل العقار"
+    "property_details": "تفاصيل العقار",
+    "add_amenity": "إضافة ميزة",
+    "remove_amenity": "حذف"
 }

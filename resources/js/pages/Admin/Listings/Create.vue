@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ImagePlus, X } from 'lucide-vue-next';
+import { ImagePlus, X, Plus } from 'lucide-vue-next';
 import adminListings from '@/routes/admin/listings';
 
 const { t } = useI18n();
@@ -44,6 +45,20 @@ const getImageUrl = (image: File | string) => {
     }
     return image;
 };
+
+const newAmenity = ref('');
+
+function addAmenity() {
+    const trimmed = newAmenity.value.trim();
+    if (trimmed && !form.amenities.includes(trimmed)) {
+        form.amenities.push(trimmed);
+        newAmenity.value = '';
+    }
+}
+
+function removeAmenity(index: number) {
+    form.amenities.splice(index, 1);
+}
 
 function submit() {
     form.post(adminListings.store().url);
@@ -240,6 +255,40 @@ function submit() {
                             <ImagePlus class="size-8 text-gray-400 mb-2" />
                             <span class="text-sm font-medium text-gray-500">{{ t('add_images') }}</span>
                         </label>
+                    </div>
+                </div>
+
+                <!-- Amenities -->
+                <div class="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6">
+                    <h2 class="mb-4 text-base font-bold text-[#1F1F1F] sm:text-lg">{{ t('amenities') }}</h2>
+                    <div class="flex flex-wrap gap-2">
+                        <span
+                            v-for="(amenity, index) in form.amenities"
+                            :key="index"
+                            class="inline-flex items-center gap-1.5 rounded-full bg-[#FFC107]/10 px-3 py-1.5 text-sm font-medium text-[#1F1F1F]"
+                        >
+                            {{ amenity }}
+                            <button type="button" @click="removeAmenity(index)" class="text-gray-400 hover:text-red-500">
+                                <X class="size-3.5" />
+                            </button>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex gap-2">
+                        <input
+                            v-model="newAmenity"
+                            type="text"
+                            :placeholder="t('add_amenity')"
+                            class="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-[#1F1F1F] focus:border-[#FFC107] focus:outline-none focus:ring-2 focus:ring-[#FFC107]/30"
+                            @keydown.enter.prevent="addAmenity"
+                        />
+                        <button
+                            type="button"
+                            @click="addAmenity"
+                            class="flex items-center gap-1 rounded-xl bg-[#FFC107] px-4 py-2.5 text-sm font-semibold text-[#1F1F1F] hover:bg-yellow-500"
+                        >
+                            <Plus class="size-4" />
+                            {{ t('add_amenity') }}
+                        </button>
                     </div>
                 </div>
 
