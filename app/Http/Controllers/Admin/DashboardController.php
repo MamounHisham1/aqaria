@@ -6,13 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\Listing;
 use App\Models\ListingClick;
 use App\Models\ListingView;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function index(): \Inertia\Response
+    public function index(): Response
     {
+        Gate::authorize('viewAny', Listing::class);
+
         $totalListings = Listing::count();
         $activeListings = Listing::active()->count();
         $totalViews = ListingView::count();

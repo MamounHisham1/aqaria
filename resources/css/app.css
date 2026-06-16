@@ -170,3 +170,16 @@
         font-weight: 600;
     }
 }
+
+@keyframes zoom {
+    0%, 100% {
+        transform: scale(1.03);
+    }
+    50% {
+        transform: scale(1.09);
+    }
+}
+
+.animate-zoom {
+    animation: zoom 45s ease-in-out infinite;
+}

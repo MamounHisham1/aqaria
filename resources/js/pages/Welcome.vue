@@ -36,37 +36,49 @@ defineProps<Props>();
     <Head :title="t('hero_title')" />
 
     <!-- Hero Section -->
-    <section class="relative bg-[#1F1F1F] px-4 py-16 md:py-24">
-        <div class="mx-auto max-w-7xl text-center">
-            <h1 class="mb-4 text-3xl font-bold text-white md:text-5xl">
+    <section class="relative min-h-[75vh] md:min-h-[85vh] flex items-center justify-center bg-[#1F1F1F] px-4 py-16 md:py-24 overflow-hidden">
+        <!-- Background Image with elegant overlay -->
+        <div class="absolute inset-0 z-0 select-none pointer-events-none">
+            <img
+                src="/images/hero-bg.png"
+                alt="Aqaria Luxury Real Estate"
+                class="h-full w-full object-cover object-center scale-105 animate-zoom"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-[#1F1F1F] via-[#1F1F1F]/80 to-[#1F1F1F]/45"></div>
+            <!-- Bottom subtle glow matching the golden hour sunset -->
+            <div class="absolute -bottom-1/4 left-1/2 h-[300px] w-[500px] -translate-x-1/2 rounded-full bg-[#FFC107]/10 blur-[120px]"></div>
+        </div>
+
+        <div class="relative z-10 mx-auto max-w-7xl text-center w-full">
+            <h1 class="mb-4 text-4xl font-extrabold tracking-tight text-white md:text-6xl drop-shadow-[0_4px_12px_rgba(0,0,0,0.65)]">
                 {{ t('hero_title') }}
             </h1>
-            <p class="mx-auto mb-8 max-w-2xl text-lg text-gray-300 md:text-xl">
+            <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-200 md:text-xl font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
                 {{ t('hero_subtitle') }}
             </p>
 
             <!-- Search -->
-            <div class="mx-auto flex justify-center">
-                <SearchBar :cities="cities" />
+            <div class="mx-auto flex justify-center transform hover:scale-[1.01] transition-transform duration-300">
+                <SearchBar :cities="cities" class="shadow-2xl border border-white/10" />
             </div>
 
             <!-- Quick Links -->
-            <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
                 <Link
                     :href="listings({ listing_type: 'sale' })"
-                    class="rounded-xl bg-white/10 px-5 py-3 text-base font-medium text-white backdrop-blur-sm transition-colors hover:bg-[#FFC107] hover:text-[#1F1F1F]"
+                    class="rounded-xl bg-white/10 border border-white/15 px-6 py-3.5 text-base font-semibold text-white backdrop-blur-md transition-all duration-300 hover:bg-[#FFC107] hover:border-[#FFC107] hover:text-[#1F1F1F] hover:shadow-lg hover:shadow-[#FFC107]/15"
                 >
                     {{ t('for_sale') }}
                 </Link>
                 <Link
                     :href="listings({ listing_type: 'rent' })"
-                    class="rounded-xl bg-white/10 px-5 py-3 text-base font-medium text-white backdrop-blur-sm transition-colors hover:bg-[#FFC107] hover:text-[#1F1F1F]"
+                    class="rounded-xl bg-white/10 border border-white/15 px-6 py-3.5 text-base font-semibold text-white backdrop-blur-md transition-all duration-300 hover:bg-[#FFC107] hover:border-[#FFC107] hover:text-[#1F1F1F] hover:shadow-lg hover:shadow-[#FFC107]/15"
                 >
                     {{ t('for_rent') }}
                 </Link>
                 <Link
                     :href="listings()"
-                    class="rounded-xl bg-[#FFC107] px-5 py-3 text-base font-semibold text-[#1F1F1F] transition-colors hover:bg-yellow-500"
+                    class="rounded-xl bg-[#FFC107] px-6 py-3.5 text-base font-bold text-[#1F1F1F] shadow-lg shadow-[#FFC107]/20 transition-all duration-300 hover:bg-yellow-500 hover:shadow-[#FFC107]/40 hover:-translate-y-0.5"
                 >
                     {{ t('browse_all_listings') }}
                 </Link>

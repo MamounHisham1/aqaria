@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 import { ChevronDown, ChevronUp } from 'lucide-vue-next';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -64,6 +64,7 @@ function applyFilter(key: string, value: string) {
     } else {
         delete localFilters.value[key];
     }
+
     emit('update:filters', { ...localFilters.value });
 }
 

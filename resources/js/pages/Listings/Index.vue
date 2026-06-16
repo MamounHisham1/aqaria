@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
 import { SlidersHorizontal, X } from 'lucide-vue-next';
+import { ref, watch } from 'vue';
+import FilterPanel from '@/components/FilterPanel.vue';
 import ListingCard from '@/components/ListingCard.vue';
 import SearchBar from '@/components/SearchBar.vue';
-import FilterPanel from '@/components/FilterPanel.vue';
 
 type Listing = {
     id: number;

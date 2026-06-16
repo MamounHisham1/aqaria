@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
 import {
     Bed, Bath, Maximize, MapPin, Phone, MessageCircle,
     ChevronLeft, ChevronRight, Check,
 } from 'lucide-vue-next';
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import ListingCard from '@/components/ListingCard.vue';
+import ListingMap from '@/components/ListingMap.vue';
 import { index as listings, click } from '@/routes/listings/index';
 
 type Listing = {
@@ -25,6 +26,8 @@ type Listing = {
     bedrooms: number;
     bathrooms: number;
     area_sqm: number;
+    latitude: number | null;
+    longitude: number | null;
     contact_phone: string;
     contact_whatsapp: string | null;
     amenities: string[];
@@ -76,6 +79,7 @@ const propertyTypeKey = (type: string) => {
         townhouse: 'townhouse',
         commercial: 'commercial_type',
     };
+
     return map[type.toLowerCase()] || type;
 };
 </script>
@@ -209,6 +213,21 @@ const propertyTypeKey = (type: string) => {
                         <p class="text-base leading-relaxed text-gray-600">
                             {{ listing.description }}
                         </p>
+                    </div>
+
+                    <div
+                        v-if="listing.latitude && listing.longitude"
+                        class="mt-6 rounded-2xl border border-gray-200 bg-white p-6"
+                    >
+                        <ListingMap 
+                            :latitude="listing.latitude" 
+                            :longitude="listing.longitude" 
+                            :title="listing.title" 
+                        >
+                            <template #icon>
+                                <MapPin class="size-6 text-[#FFC107]" />
+                            </template>
+                        </ListingMap>
                     </div>
 
                     <div

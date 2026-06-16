@@ -26,6 +26,12 @@ Route::get('/listings', [ListingController::class, 'index'])->name('listings.ind
 Route::get('/listings/{listing}', [ListingController::class, 'show'])->name('listings.show');
 Route::post('/listings/{listing}/click', [ListingController::class, 'recordClick'])->name('listings.click');
 
+// ========== Customer Routes ==========
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\Customer\DashboardController::class, 'index'])->name('dashboard');
+});
+
 // ========== Admin Routes ==========
 
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -42,4 +48,4 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
 });
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';

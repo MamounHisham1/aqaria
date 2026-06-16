@@ -175,5 +175,21 @@
     "interested_in_property": "Interested in this property?",
     "property_details": "Property Details",
     "add_amenity": "Add amenity",
-    "remove_amenity": "Remove"
+    "remove_amenity": "Remove",
+    "location_on_map": "Location on Map",
+    "view_on_google_maps": "View on Google Maps",
+    "customer_dashboard": "Customer Dashboard",
+    "welcome_back": "Welcome back",
+    "account_overview": "Account Overview",
+    "manage_account_status": "Manage your account status and preferences",
+    "email_status": "Email Status",
+    "email_verified": "Email Verified",
+    "email_not_verified": "Email Not Verified",
+    "resend_verification": "Resend Verification",
+    "member_since": "Member Since",
+    "quick_actions": "Quick Actions",
+    "access_settings": "Access your account settings",
+    "edit_profile": "Edit Profile",
+    "security_settings": "Security Settings",
+    "browse_properties": "Browse Properties"
 }

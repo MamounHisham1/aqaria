@@ -7,15 +7,19 @@ use App\Models\Listing;
 use App\Models\ListingClick;
 use App\Models\ListingView;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class AnalyticsController extends Controller
 {
     /**
      * Display analytics dashboard.
      */
-    public function index(Request $request): \Inertia\Response
+    public function index(Request $request): Response
     {
+        Gate::authorize('viewAny', Listing::class);
+
         $days = $request->input('days', 30);
 
         $viewsOverTime = ListingView::query()

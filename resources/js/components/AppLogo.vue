@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { useI18n } from 'vue-i18n';
+import AppLogoIcon from '@/components/AppLogoIcon.vue';
 
 const { t } = useI18n();
 </script>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useLocale } from '@/composables/useLocale';
+import { Languages } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -7,7 +7,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Languages } from 'lucide-vue-next';
+import { useLocale } from '@/composables/useLocale';
 
 const { locale, setLocale } = useLocale();
 

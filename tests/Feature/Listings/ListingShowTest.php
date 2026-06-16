@@ -190,3 +190,18 @@ test('show page includes listing amenities and images', function () {
             ->where('listing.amenities', ['Pool', 'Gym', 'Parking'])
     );
 });
+
+test('show page includes listing latitude and longitude', function () {
+    $this->listing->update([
+        'latitude' => '30.0444200',
+        'longitude' => '31.2357116',
+    ]);
+
+    $response = $this->get(route('listings.show', $this->listing));
+
+    $response->assertInertia(
+        fn ($page) => $page
+            ->where('listing.latitude', '30.0444200')
+            ->where('listing.longitude', '31.2357116')
+    );
+});

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ImagePlus, X, Plus } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ImagePlus, X, Plus } from 'lucide-vue-next';
 import adminListings from '@/routes/admin/listings';
 
 const { t } = useI18n();
@@ -29,9 +29,11 @@ const form = useForm({
 
 const handleImageUpload = (event: Event) => {
     const target = event.target as HTMLInputElement;
+
     if (target.files) {
         form.images = [...form.images, ...Array.from(target.files)];
     }
+
     target.value = ''; // reset input
 };
 
@@ -43,6 +45,7 @@ const getImageUrl = (image: File | string) => {
     if (image instanceof File) {
         return URL.createObjectURL(image);
     }
+
     return image;
 };
 
@@ -50,6 +53,7 @@ const newAmenity = ref('');
 
 function addAmenity() {
     const trimmed = newAmenity.value.trim();
+
     if (trimmed && !form.amenities.includes(trimmed)) {
         form.amenities.push(trimmed);
         newAmenity.value = '';

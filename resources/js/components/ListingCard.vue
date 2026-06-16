@@ -34,6 +34,7 @@ const propertyTypeKey = (type: string) => {
         townhouse: 'townhouse',
         commercial: 'commercial_type',
     };
+
     return map[type.toLowerCase()] || type;
 };
 </script>

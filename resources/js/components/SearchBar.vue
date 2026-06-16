@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { Search, MapPin } from 'lucide-vue-next';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -25,8 +25,14 @@ const city = ref(props.initialCity);
 
 function submitSearch() {
     const params: Record<string, string> = {};
-    if (query.value.trim()) params.q = query.value.trim();
-    if (city.value) params.city = city.value;
+
+    if (query.value.trim()) {
+params.q = query.value.trim();
+}
+
+    if (city.value) {
+params.city = city.value;
+}
 
     router.get('/listings', params, { preserveState: true });
 }

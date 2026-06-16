@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, Building2, BarChart3 } from 'lucide-vue-next';
+import { Link, usePage } from '@inertiajs/vue3';
+import { LayoutGrid, Building2, BarChart3, Settings } from 'lucide-vue-next';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -14,31 +16,56 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, analytics } from '@/routes/admin/index';
+import { dashboard as adminDashboard, analytics } from '@/routes/admin/index';
 import adminListings from '@/routes/admin/listings';
-import type { NavItem } from '@/types';
+import { dashboard as customerDashboard } from '@/routes/index';
+import { index as listingsIndex } from '@/routes/listings';
+import type { NavItem, Auth } from '@/types';
 
-import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
+const page = usePage();
+const user = computed(() => page.props.auth.user);
 
-const mainNavItems: NavItem[] = [
-    {
-        title: t('dashboard'),
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-    {
-        title: t('listings'),
-        href: adminListings.index(),
-        icon: Building2,
-    },
-    {
-        title: t('analytics'),
-        href: analytics(),
-        icon: BarChart3,
-    },
-];
+const mainNavItems = computed<NavItem[]>(() => {
+    if (user.value?.is_admin) {
+        return [
+            {
+                title: t('dashboard'),
+                href: adminDashboard(),
+                icon: LayoutGrid,
+            },
+            {
+                title: t('listings'),
+                href: adminListings.index(),
+                icon: Building2,
+            },
+            {
+                title: t('analytics'),
+                href: analytics(),
+                icon: BarChart3,
+            },
+        ];
+    }
+
+    return [
+        {
+            title: t('dashboard'),
+            href: customerDashboard(),
+            icon: LayoutGrid,
+        },
+        {
+            title: t('browse_properties'),
+            href: listingsIndex(),
+            icon: Building2,
+        },
+        {
+            title: t('settings'),
+            href: '/settings',
+            icon: Settings,
+        },
+    ];
+});
 </script>
 
 <template>
@@ -47,7 +74,7 @@ const mainNavItems: NavItem[] = [
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
+                        <Link :href="user?.is_admin ? adminDashboard() : customerDashboard()">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>
