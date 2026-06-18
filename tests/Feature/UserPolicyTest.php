@@ -79,10 +79,10 @@ it('prevents admin from deleting themselves', function () {
     expect($admin->can('delete', $admin))->toBeFalse();
 });
 
-it('prevents user from deleting themselves', function () {
+it('allows user to delete themselves', function () {
     $user = User::factory()->create(['is_admin' => false]);
 
-    expect($user->can('delete', $user))->toBeFalse();
+    expect($user->can('delete', $user))->toBeTrue();
 });
 
 it('prevents user from deleting other users', function () {

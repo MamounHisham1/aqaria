@@ -35,7 +35,7 @@ class AnalyticsController extends Controller
             ->groupBy('click_type')
             ->get();
 
-        $topListings = Listing::active()
+        $topListings = Listing::query()
             ->withCount('views')
             ->withCount('clicks')
             ->orderByDesc('views_count')
