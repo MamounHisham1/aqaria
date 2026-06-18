@@ -230,5 +230,10 @@
     "save_listing": "Save Listing",
     "remove_favorite": "Remove from Favorites",
     "alert_email_desc": "Get notified when new matching listings are added",
-    "saved_properties": "Saved properties"
+    "saved_properties": "Saved properties",
+    "views": "Views",
+    "clicks": "Clicks",
+    "conversion_funnel": "Conversion Funnel",
+    "avg_time_to_contact": "Avg. time to first contact",
+    "recent_leads": "Recent Leads"
 }

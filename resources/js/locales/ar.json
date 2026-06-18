@@ -304,5 +304,10 @@
     "save_listing": "حفظ العقار",
     "remove_favorite": "إزالة من المفضلة",
     "alert_email_desc": "احصل على إشعار عند إضافة عقارات مطابقة جديدة",
-    "saved_properties": "العقارات المحفوظة"
+    "saved_properties": "العقارات المحفوظة",
+    "views": "المشاهدات",
+    "clicks": "النقرات",
+    "conversion_funnel": "مسار التحويل",
+    "avg_time_to_contact": "متوسط وقت التواصل الأول",
+    "recent_leads": "أحدث العملاء"
 }
