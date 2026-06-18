@@ -4,8 +4,10 @@ use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LeadController as AdminLeadController;
 use App\Http\Controllers\Admin\ListingController as AdminListingController;
+use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\ListingController;
+use App\Http\Controllers\SavedSearchController;
 use App\Models\Listing;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -33,6 +35,11 @@ Route::post('/listings/{listing}/leads', [LeadController::class, 'store'])->name
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Customer\DashboardController::class, 'index'])->name('dashboard');
+
+    Route::post('/listings/{listing}/favorite', [FavoriteController::class, 'toggle'])->name('listings.favorite');
+
+    Route::post('/saved-searches', [SavedSearchController::class, 'store'])->name('saved-searches.store');
+    Route::delete('/saved-searches/{savedSearch}', [SavedSearchController::class, 'destroy'])->name('saved-searches.destroy');
 });
 
 // ========== Admin Routes ==========

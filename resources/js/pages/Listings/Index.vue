@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
-import { SlidersHorizontal, X } from 'lucide-vue-next';
-import { ref, watch } from 'vue';
+import { Head, router, useForm, usePage } from '@inertiajs/vue3';
+import { SlidersHorizontal, X, Bookmark } from 'lucide-vue-next';
+import { computed, ref, watch } from 'vue';
 import FilterPanel from '@/components/FilterPanel.vue';
 import ListingCard from '@/components/ListingCard.vue';
 import SearchBar from '@/components/SearchBar.vue';
+import { store as saveSearchStore } from '@/routes/saved-searches';
 
 type Listing = {
     id: number;
@@ -39,8 +40,33 @@ type Props = {
 };
 
 const props = defineProps<Props>();
+const page = usePage();
+const user = computed(() => page.props.auth?.user);
 
 const mobileFiltersOpen = ref(false);
+const showSaveSearch = ref(false);
+
+const hasActiveFilters = computed(() =>
+    Object.values(props.filters).some((v) => v && v !== 'newest'),
+);
+
+const saveSearchForm = useForm({
+    name: '',
+    notify: false,
+    filters: props.filters,
+});
+
+function submitSaveSearch() {
+    saveSearchForm.filters = props.filters;
+    saveSearchForm.post(saveSearchStore().url, {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+            saveSearchForm.reset();
+            showSaveSearch.value = false;
+        },
+    });
+}
 
 function updateFilters(newFilters: Record<string, string>) {
     router.get(
@@ -54,10 +80,10 @@ function updateFilters(newFilters: Record<string, string>) {
     );
 }
 
-function goToPage(page: number) {
+function goToPage(pageNum: number) {
     router.get(
         '/listings',
-        { ...props.filters, page: page.toString() },
+        { ...props.filters, page: pageNum.toString() },
         {
             preserveState: true,
             replace: true,
@@ -152,6 +178,39 @@ function goToPage(page: number) {
                     <span>
                         {{ $t('showing_results', { from: listings.from, to: listings.to, total: listings.total }) }}
                     </span>
+                    <div v-if="user && hasActiveFilters" class="flex items-center gap-2">
+                        <template v-if="!showSaveSearch">
+                            <button
+                                class="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-[#1F1F1F] hover:bg-gray-50"
+                                @click="showSaveSearch = true"
+                            >
+                                <Bookmark class="size-3.5" />
+                                {{ $t('save_search') }}
+                            </button>
+                        </template>
+                        <div v-else class="flex items-center gap-1.5">
+                            <input
+                                v-model="saveSearchForm.name"
+                                type="text"
+                                :placeholder="$t('save_search') + '...'"
+                                class="w-44 rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-[#1F1F1F] focus:border-[#FFC107] focus:outline-none"
+                            />
+                            <label class="flex items-center gap-1 text-xs text-gray-500">
+                                <input v-model="saveSearchForm.notify" type="checkbox" class="size-3" />
+                                {{ $t('confirm') }}
+                            </label>
+                            <button
+                                :disabled="saveSearchForm.processing || !saveSearchForm.name"
+                                class="rounded-lg bg-[#FFC107] px-3 py-1.5 text-xs font-semibold text-[#1F1F1F] disabled:opacity-50"
+                                @click="submitSaveSearch"
+                            >
+                                {{ $t('save') }}
+                            </button>
+                            <button class="px-1 text-xs text-gray-400" @click="showSaveSearch = false">
+                                <X class="size-3.5" />
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Listing Cards -->

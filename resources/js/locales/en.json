@@ -229,5 +229,6 @@
     "save_search": "Save Search",
     "save_listing": "Save Listing",
     "remove_favorite": "Remove from Favorites",
-    "alert_email_desc": "Get notified when new matching listings are added"
+    "alert_email_desc": "Get notified when new matching listings are added",
+    "saved_properties": "Saved properties"
 }
