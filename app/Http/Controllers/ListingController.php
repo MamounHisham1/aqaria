@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Jobs\RecordListingClick;
 use App\Jobs\RecordListingView;
 use App\Models\Listing;
+use App\Support\ListingFilters;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,43 +20,8 @@ class ListingController extends Controller
     {
         $query = Listing::query()->active()->withCount('views')->withCount('clicks');
 
-        // Search
-        if ($request->filled('q')) {
-            $query->search($request->input('q'));
-        }
-
-        // Filters
-        if ($request->filled('city')) {
-            $query->inCity($request->input('city'));
-        }
-
-        if ($request->filled('listing_type')) {
-            $query->byListingType($request->input('listing_type'));
-        }
-
-        if ($request->filled('property_type')) {
-            $query->byPropertyType($request->input('property_type'));
-        }
-
-        if ($request->filled('min_price')) {
-            $query->priceBetween($request->input('min_price'), $request->input('max_price'));
-        } elseif ($request->filled('max_price')) {
-            $query->priceBetween(null, $request->input('max_price'));
-        }
-
-        if ($request->filled('min_area')) {
-            $query->areaBetween($request->input('min_area'), $request->input('max_area'));
-        } elseif ($request->filled('max_area')) {
-            $query->areaBetween(null, $request->input('max_area'));
-        }
-
-        if ($request->filled('bedrooms')) {
-            $query->withBedrooms($request->input('bedrooms'));
-        }
-
-        if ($request->filled('bathrooms')) {
-            $query->withBathrooms($request->input('bathrooms'));
-        }
+        // Apply the canonical set of listing filters (single source of truth).
+        ListingFilters::apply($query, $request->only(ListingFilters::keys()));
 
         // Sort
         $sort = $request->input('sort', 'newest');
@@ -74,19 +40,7 @@ class ListingController extends Controller
 
         return Inertia::render('Listings/Index', [
             'listings' => $listings,
-            'filters' => $request->only([
-                'q',
-                'city',
-                'listing_type',
-                'property_type',
-                'min_price',
-                'max_price',
-                'min_area',
-                'max_area',
-                'bedrooms',
-                'bathrooms',
-                'sort',
-            ]),
+            'filters' => $request->only([...ListingFilters::keys(), 'sort']),
             'filterOptions' => [
                 'cities' => $cities,
                 'propertyTypes' => ['apartment', 'villa', 'townhouse', 'commercial'],

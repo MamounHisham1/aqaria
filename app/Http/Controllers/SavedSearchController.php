@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\SavedSearch;
+use App\Support\ListingFilters;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class SavedSearchController extends Controller
 {
@@ -14,20 +14,14 @@ class SavedSearchController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $filterRules = collect(ListingFilters::rules())
+            ->mapWithKeys(fn ($rules, $key) => ["filters.{$key}" => $rules])
+            ->all();
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'notify' => ['boolean'],
-            // Capture only the filter keys that the listings index understands.
-            'filters.q' => ['nullable', 'string', 'max:200'],
-            'filters.city' => ['nullable', 'string', 'max:100'],
-            'filters.listing_type' => ['nullable', Rule::in(['sale', 'rent'])],
-            'filters.property_type' => ['nullable', Rule::in(['apartment', 'villa', 'townhouse', 'commercial'])],
-            'filters.min_price' => ['nullable', 'numeric', 'min:0'],
-            'filters.max_price' => ['nullable', 'numeric', 'min:0'],
-            'filters.min_area' => ['nullable', 'integer', 'min:0'],
-            'filters.max_area' => ['nullable', 'integer', 'min:0'],
-            'filters.bedrooms' => ['nullable', 'integer', 'min:0'],
-            'filters.bathrooms' => ['nullable', 'integer', 'min:0'],
+            ...$filterRules,
         ]);
 
         $request->user()->savedSearches()->create([
