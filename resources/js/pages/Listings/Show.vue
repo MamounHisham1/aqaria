@@ -6,8 +6,8 @@ import {
 } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import ListingCard from '@/components/ListingCard.vue';
 import LeadForm from '@/components/LeadForm.vue';
+import ListingCard from '@/components/ListingCard.vue';
 import ListingMap from '@/components/ListingMap.vue';
 import SeoMeta from '@/components/SeoMeta.vue';
 import { index as listings, click } from '@/routes/listings/index';

@@ -7,8 +7,8 @@ import {
 import { useI18n } from 'vue-i18n';
 import StatCard from '@/components/StatCard.vue';
 import { analytics } from '@/routes/admin/index';
-import adminListings from '@/routes/admin/listings';
 import adminLeads from '@/routes/admin/leads';
+import adminListings from '@/routes/admin/listings';
 
 const { t } = useI18n();
 
@@ -58,8 +58,15 @@ const funnelRate = (numerator: number, denominator: number) =>
 const formatTimeAgo = (dateString: string) => {
     const diff = Date.now() - new Date(dateString).getTime();
     const hours = Math.floor(diff / 3600000);
-    if (hours < 1) return '< 1h';
-    if (hours < 24) return `${hours}h`;
+
+    if (hours < 1) {
+return '< 1h';
+}
+
+    if (hours < 24) {
+return `${hours}h`;
+}
+
     return `${Math.floor(hours / 24)}d`;
 };
 

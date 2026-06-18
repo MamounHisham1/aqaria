@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { Head, Link, usePage, router } from '@inertiajs/vue3';
 import { ShieldCheck, ShieldAlert, Calendar, Settings, User, Building2, Palette, Heart, Search, Trash2, Bell } from 'lucide-vue-next';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { dashboard } from '@/routes/index';
-import { index as listingsIndex } from '@/routes/listings';
+import ListingCard from '@/components/ListingCard.vue';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import ListingCard from '@/components/ListingCard.vue';
+import { dashboard } from '@/routes/index';
+import { index as listingsIndex } from '@/routes/listings';
 import type { Auth } from '@/types';
 
 defineOptions({
@@ -29,6 +29,7 @@ const user = computed(() => page.props.auth.user);
 type Listing = {
     id: number;
     title: string;
+    price: string;
     formatted_price: string;
     primary_image: string | null;
     city: string;
@@ -70,9 +71,13 @@ const formatDate = (dateString: string) => {
 
 const filtersToQuery = (filters: Record<string, string | number | null>) => {
     const q: Record<string, string | number> = {};
+
     for (const [k, v] of Object.entries(filters)) {
-        if (v !== null && v !== '') q[k] = v;
+        if (v !== null && v !== '') {
+q[k] = v;
+}
     }
+
     return q;
 };
 

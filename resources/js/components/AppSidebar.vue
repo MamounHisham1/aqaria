@@ -17,8 +17,8 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard as adminDashboard, analytics } from '@/routes/admin/index';
-import adminListings from '@/routes/admin/listings';
 import adminLeads from '@/routes/admin/leads';
+import adminListings from '@/routes/admin/listings';
 import { dashboard as customerDashboard } from '@/routes/index';
 import { index as listingsIndex } from '@/routes/listings';
 import type { NavItem, Auth } from '@/types';

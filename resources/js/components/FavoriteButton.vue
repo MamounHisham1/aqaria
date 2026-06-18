@@ -2,7 +2,7 @@
 import { router } from '@inertiajs/vue3';
 import { Heart } from 'lucide-vue-next';
 import { ref } from 'vue';
-import { toggle as favoriteToggle } from '@/routes/listings/favorite';
+import { favorite as favoriteToggle } from '@/routes/listings';
 
 type Props = {
     listingId: number;
@@ -26,6 +26,7 @@ function toggle() {
                 const json = (page.props as Record<string, unknown>);
                 // Optimistic flip; server already persisted the toggle.
                 isFavorited.value = !isFavorited.value;
+
                 if (json && typeof json.is_favorited === 'boolean') {
                     isFavorited.value = json.is_favorited;
                 }

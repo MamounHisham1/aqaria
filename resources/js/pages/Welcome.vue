@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { Search, Building2, Home, MapPin } from 'lucide-vue-next';
+import { Building2, Home } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 import ListingCard from '@/components/ListingCard.vue';
 import SearchBar from '@/components/SearchBar.vue';
