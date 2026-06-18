@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { LayoutGrid, Building2, BarChart3, Settings } from 'lucide-vue-next';
+import { LayoutGrid, Building2, BarChart3, Settings, Inbox } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AppLogo from '@/components/AppLogo.vue';
@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard as adminDashboard, analytics } from '@/routes/admin/index';
 import adminListings from '@/routes/admin/listings';
+import adminLeads from '@/routes/admin/leads';
 import { dashboard as customerDashboard } from '@/routes/index';
 import { index as listingsIndex } from '@/routes/listings';
 import type { NavItem, Auth } from '@/types';
@@ -39,6 +40,11 @@ const mainNavItems = computed<NavItem[]>(() => {
                 title: t('listings'),
                 href: adminListings.index(),
                 icon: Building2,
+            },
+            {
+                title: t('leads'),
+                href: adminLeads.index(),
+                icon: Inbox,
             },
             {
                 title: t('analytics'),

@@ -7,6 +7,7 @@ import {
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import ListingCard from '@/components/ListingCard.vue';
+import LeadForm from '@/components/LeadForm.vue';
 import ListingMap from '@/components/ListingMap.vue';
 import { index as listings, click } from '@/routes/listings/index';
 
@@ -267,6 +268,8 @@ const propertyTypeKey = (type: string) => {
                 <!-- Sidebar - Contact Card -->
                 <div class="lg:col-span-1">
                     <div class="sticky top-24 space-y-6">
+                        <LeadForm :listing-id="listing.id" />
+
                         <div class="rounded-2xl border border-gray-200 bg-white p-6">
                             <h3 class="mb-4 text-lg font-bold text-[#1F1F1F]">
                                 {{ t('interested_in_property') }}

@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\LeadController as AdminLeadController;
 use App\Http\Controllers\Admin\ListingController as AdminListingController;
+use App\Http\Controllers\LeadController;
 use App\Http\Controllers\ListingController;
 use App\Models\Listing;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +27,7 @@ Route::get('/', function () {
 Route::get('/listings', [ListingController::class, 'index'])->name('listings.index');
 Route::get('/listings/{listing}', [ListingController::class, 'show'])->name('listings.show');
 Route::post('/listings/{listing}/click', [ListingController::class, 'recordClick'])->name('listings.click');
+Route::post('/listings/{listing}/leads', [LeadController::class, 'store'])->name('listings.leads.store');
 
 // ========== Customer Routes ==========
 
@@ -44,6 +47,10 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::put('/listings/{listing}', [AdminListingController::class, 'update'])->name('listings.update');
     Route::delete('/listings/{listing}', [AdminListingController::class, 'destroy'])->name('listings.destroy');
     Route::patch('/listings/{listing}/toggle', [AdminListingController::class, 'toggleActive'])->name('listings.toggle');
+
+    Route::get('/leads', [AdminLeadController::class, 'index'])->name('leads.index');
+    Route::get('/leads/{lead}', [AdminLeadController::class, 'show'])->name('leads.show');
+    Route::patch('/leads/{lead}', [AdminLeadController::class, 'update'])->name('leads.update');
 
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
 });
