@@ -63,10 +63,18 @@ test('customer dashboard shows the users favorites', function () {
     );
 });
 
-test('favoriting a listing with cascading delete removes the favorite', function () {
+test('soft-deleting a listing keeps its favorites (restorable)', function () {
     $this->user->favorites()->attach($this->listing);
 
     $this->listing->delete();
+
+    expect(Favorite::where('listing_id', $this->listing->id)->count())->toBe(1);
+});
+
+test('force-deleting a listing cascades its favorites', function () {
+    $this->user->favorites()->attach($this->listing);
+
+    $this->listing->forceDelete();
 
     expect(Favorite::where('listing_id', $this->listing->id)->count())->toBe(0);
 });

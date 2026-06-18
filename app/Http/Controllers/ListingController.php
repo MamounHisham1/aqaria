@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\RecordListingClick;
+use App\Jobs\RecordListingView;
 use App\Models\Listing;
-use App\Models\ListingClick;
-use App\Models\ListingView;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -106,23 +106,14 @@ class ListingController extends Controller
 
         $visitorId = $request->cookie('visitor_id');
 
-        // Track view (deduplicate: same visitor + same listing within 24h)
+        // Track view asynchronously (dedup happens inside the job).
         if ($visitorId) {
-            $recentView = ListingView::query()
-                ->forListing($listing->id)
-                ->byVisitor($visitorId)
-                ->where('viewed_at', '>=', now()->subDay())
-                ->exists();
-
-            if (! $recentView) {
-                ListingView::create([
-                    'listing_id' => $listing->id,
-                    'visitor_id' => $visitorId,
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                    'viewed_at' => now(),
-                ]);
-            }
+            RecordListingView::dispatch(
+                $listing->id,
+                $visitorId,
+                $request->ip(),
+                $request->userAgent(),
+            );
         }
 
         // Load relationships
@@ -213,12 +204,11 @@ class ListingController extends Controller
         $visitorId = $request->cookie('visitor_id');
 
         if ($visitorId) {
-            ListingClick::create([
-                'listing_id' => $listing->id,
-                'visitor_id' => $visitorId,
-                'click_type' => $request->input('click_type'),
-                'clicked_at' => now(),
-            ]);
+            RecordListingClick::dispatch(
+                $listing->id,
+                $visitorId,
+                $request->input('click_type'),
+            );
         }
 
         return response()->json(['success' => true]);

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'title',
@@ -32,7 +33,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Listing extends Model
 {
     /** @use HasFactory<ListingFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * Get the attributes that should be cast.
@@ -127,8 +128,8 @@ class Listing extends Model
      */
     public function scopePriceBetween($query, ?float $min, ?float $max)
     {
-        return $query->when($min, fn($q) => $q->where('price', '>=', $min))
-            ->when($max, fn($q) => $q->where('price', '<=', $max));
+        return $query->when($min, fn ($q) => $q->where('price', '>=', $min))
+            ->when($max, fn ($q) => $q->where('price', '<=', $max));
     }
 
     /**
@@ -136,8 +137,8 @@ class Listing extends Model
      */
     public function scopeAreaBetween($query, ?int $min, ?int $max)
     {
-        return $query->when($min, fn($q) => $q->where('area_sqm', '>=', $min))
-            ->when($max, fn($q) => $q->where('area_sqm', '<=', $max));
+        return $query->when($min, fn ($q) => $q->where('area_sqm', '>=', $min))
+            ->when($max, fn ($q) => $q->where('area_sqm', '<=', $max));
     }
 
     /**
@@ -145,7 +146,7 @@ class Listing extends Model
      */
     public function scopeWithBedrooms($query, ?int $bedrooms)
     {
-        return $query->when($bedrooms, fn($q) => $q->where('bedrooms', '>=', $bedrooms));
+        return $query->when($bedrooms, fn ($q) => $q->where('bedrooms', '>=', $bedrooms));
     }
 
     /**
@@ -153,7 +154,7 @@ class Listing extends Model
      */
     public function scopeWithBathrooms($query, ?int $bathrooms)
     {
-        return $query->when($bathrooms, fn($q) => $q->where('bathrooms', '>=', $bathrooms));
+        return $query->when($bathrooms, fn ($q) => $q->where('bathrooms', '>=', $bathrooms));
     }
 
     /**
@@ -161,7 +162,7 @@ class Listing extends Model
      */
     public function getFormattedPriceAttribute(): string
     {
-        return number_format($this->price, 0, '.', ',') . ' EGP';
+        return number_format($this->price, 0, '.', ',').' EGP';
     }
 
     /**
