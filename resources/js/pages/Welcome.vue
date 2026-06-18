@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 import { Search, Building2, Home, MapPin } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 import ListingCard from '@/components/ListingCard.vue';
 import SearchBar from '@/components/SearchBar.vue';
+import SeoMeta from '@/components/SeoMeta.vue';
 import { index as listings } from '@/routes/listings/index';
 
 const { t } = useI18n();
@@ -27,13 +28,18 @@ type Props = {
     featuredListings: Listing[];
     totalListings: number;
     cities: string[];
+    seo?: { title: string; description?: string; url?: string };
 };
 
 defineProps<Props>();
 </script>
 
 <template>
-    <Head :title="t('hero_title')" />
+    <SeoMeta
+        :title="seo?.title ?? t('hero_title')"
+        :description="seo?.description ?? t('hero_subtitle')"
+        :url="seo?.url"
+    />
 
     <!-- Hero Section -->
     <section class="relative min-h-[75vh] md:min-h-[85vh] flex items-center justify-center bg-[#1F1F1F] px-4 py-16 md:py-24 overflow-hidden">

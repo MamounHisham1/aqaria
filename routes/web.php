@@ -8,6 +8,7 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\SavedSearchController;
+use App\Http\Controllers\SitemapController;
 use App\Models\Listing;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -23,6 +24,11 @@ Route::get('/', function () {
         'featuredListings' => $featuredListings,
         'totalListings' => $totalListings,
         'cities' => $cities,
+        'seo' => [
+            'title' => config('app.name').' — '.__('Real Estate in Egypt'),
+            'description' => __('Browse apartments, villas, and commercial properties for sale and rent across Egypt.'),
+            'url' => url('/'),
+        ],
     ]);
 })->name('home');
 
@@ -30,6 +36,21 @@ Route::get('/listings', [ListingController::class, 'index'])->name('listings.ind
 Route::get('/listings/{listing}', [ListingController::class, 'show'])->name('listings.show');
 Route::post('/listings/{listing}/click', [ListingController::class, 'recordClick'])->name('listings.click');
 Route::post('/listings/{listing}/leads', [LeadController::class, 'store'])->name('listings.leads.store');
+
+// ========== SEO ==========
+
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/robots.txt', function () {
+    $content = "User-agent: *\n"
+        ."Allow: /\n"
+        ."Disallow: /admin\n"
+        ."Disallow: /settings\n"
+        ."Disallow: /dashboard\n"
+        ."Disallow: /telegram\n\n"
+        .'Sitemap: '.url('/sitemap.xml')."\n";
+
+    return response($content, 200, ['Content-Type' => 'text/plain']);
+})->name('robots');
 
 // ========== Customer Routes ==========
 

@@ -3,16 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Listing;
+use App\Models\ListingClick;
 use App\Models\ListingView;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ListingController extends Controller
 {
     /**
      * Display a searchable, filterable list of listings.
      */
-    public function index(Request $request): \Inertia\Response
+    public function index(Request $request): Response
     {
         $query = Listing::query()->active()->withCount('views')->withCount('clicks');
 
@@ -95,7 +98,7 @@ class ListingController extends Controller
     /**
      * Display a single listing with full details and track view.
      */
-    public function show(Request $request, Listing $listing): \Inertia\Response
+    public function show(Request $request, Listing $listing): Response
     {
         if (! $listing->is_active) {
             abort(404);
@@ -138,13 +141,70 @@ class ListingController extends Controller
         return Inertia::render('Listings/Show', [
             'listing' => $listing,
             'relatedListings' => $relatedListings,
+            'seo' => [
+                'title' => $listing->title.' — '.$listing->formatted_price,
+                'description' => $listing->description,
+                'image' => $listing->primary_image,
+                'url' => route('listings.show', $listing),
+                'schema' => $this->buildListingSchema($listing),
+            ],
         ]);
+    }
+
+    /**
+     * Build Schema.org Product/SingleFamilyResidence structured data.
+     *
+     * @return array<string, mixed>
+     */
+    private function buildListingSchema(Listing $listing): array
+    {
+        $schema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Product',
+            'name' => $listing->title,
+            'description' => $listing->description,
+            'url' => route('listings.show', $listing),
+        ];
+
+        if ($listing->primary_image) {
+            $schema['image'] = $listing->primary_image;
+        }
+
+        $offers = [
+            '@type' => 'Offer',
+            'price' => (float) $listing->price,
+            'priceCurrency' => 'EGP',
+            'availability' => $listing->listing_type === 'sale'
+                ? 'https://schema.org/InStock'
+                : 'https://schema.org/InStock',
+        ];
+
+        $schema['offers'] = $offers;
+
+        $address = [
+            '@type' => 'PostalAddress',
+            'addressLocality' => $listing->city,
+            'addressRegion' => $listing->district,
+            'streetAddress' => $listing->address,
+        ];
+
+        $schema['address'] = $address;
+
+        if ($listing->latitude && $listing->longitude) {
+            $schema['geo'] = [
+                '@type' => 'GeoCoordinates',
+                'latitude' => (float) $listing->latitude,
+                'longitude' => (float) $listing->longitude,
+            ];
+        }
+
+        return $schema;
     }
 
     /**
      * Record a click event on a listing.
      */
-    public function recordClick(Request $request, Listing $listing): \Illuminate\Http\JsonResponse
+    public function recordClick(Request $request, Listing $listing): JsonResponse
     {
         $request->validate([
             'click_type' => 'required|in:phone,whatsapp,detail',
@@ -153,7 +213,7 @@ class ListingController extends Controller
         $visitorId = $request->cookie('visitor_id');
 
         if ($visitorId) {
-            \App\Models\ListingClick::create([
+            ListingClick::create([
                 'listing_id' => $listing->id,
                 'visitor_id' => $visitorId,
                 'click_type' => $request->input('click_type'),

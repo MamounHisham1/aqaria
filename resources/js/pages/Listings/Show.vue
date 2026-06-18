@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import {
     Bed, Bath, Maximize, MapPin, Phone, MessageCircle,
     ChevronLeft, ChevronRight, Check,
@@ -9,6 +9,7 @@ import { useI18n } from 'vue-i18n';
 import ListingCard from '@/components/ListingCard.vue';
 import LeadForm from '@/components/LeadForm.vue';
 import ListingMap from '@/components/ListingMap.vue';
+import SeoMeta from '@/components/SeoMeta.vue';
 import { index as listings, click } from '@/routes/listings/index';
 
 type Listing = {
@@ -36,9 +37,18 @@ type Listing = {
     clicks_count: number;
 };
 
+type Seo = {
+    title: string;
+    description: string;
+    image: string | null;
+    url: string;
+    schema: Record<string, unknown>;
+};
+
 type Props = {
     listing: Listing;
     relatedListings: Listing[];
+    seo?: Seo;
 };
 
 const props = defineProps<Props>();
@@ -86,7 +96,14 @@ const propertyTypeKey = (type: string) => {
 </script>
 
 <template>
-    <Head :title="listing.title" />
+    <SeoMeta
+        :title="seo?.title ?? listing.title"
+        :description="seo?.description"
+        :image="seo?.image"
+        :url="seo?.url"
+        :schema="seo?.schema"
+        type="article"
+    />
 
     <div class="bg-gray-50">
         <div class="mx-auto max-w-7xl px-4 pt-6">
