@@ -4,7 +4,6 @@ namespace App\Services\Telegram;
 
 use App\Models\Listing;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 
 class ListingToolService
@@ -47,7 +46,7 @@ class ListingToolService
 
         return [
             'count' => $listings->count(),
-            'listings' => $listings->map(fn(Listing $l) => $this->formatListing($l))->toArray(),
+            'listings' => $listings->map(fn (Listing $l) => $this->formatListing($l))->toArray(),
         ];
     }
 
@@ -73,7 +72,7 @@ class ListingToolService
         if ($validator->fails()) {
             return [
                 'success' => false,
-                'error' => 'Validation failed: ' . $validator->errors()->first(),
+                'error' => 'Validation failed: '.$validator->errors()->first(),
             ];
         }
 
@@ -118,7 +117,7 @@ class ListingToolService
         if ($validator->fails()) {
             return [
                 'success' => false,
-                'error' => 'Validation failed: ' . $validator->errors()->first(),
+                'error' => 'Validation failed: '.$validator->errors()->first(),
             ];
         }
 

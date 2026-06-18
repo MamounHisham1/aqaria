@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use Database\Factories\TelegramUserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TelegramUser extends Model
 {
-    /** @use HasFactory<\Database\Factories\TelegramUserFactory> */
+    /** @use HasFactory<TelegramUserFactory> */
     use HasFactory;
 
     protected $fillable = [

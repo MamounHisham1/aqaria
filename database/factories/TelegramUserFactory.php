@@ -27,7 +27,7 @@ class TelegramUserFactory extends Factory
 
     public function authorized(): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'is_authorized' => true,
             'role' => 'admin',
         ]);

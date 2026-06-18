@@ -17,7 +17,6 @@
  * framework boots — makes the immutable Dotenv repository treat them as
  * externally defined and honour the test values regardless of host config.
  */
-
 foreach ([
     'APP_ENV' => 'testing',
     'SESSION_DRIVER' => 'array',

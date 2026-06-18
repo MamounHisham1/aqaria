@@ -14,8 +14,7 @@ class AiAssistantService
         private ListingToolService $listingTools,
         private ConversationContext $context,
         private ChatClient $chatClient,
-    ) {
-    }
+    ) {}
 
     public function processMessage(string $chatId, string $message, TelegramUser $user): string
     {
@@ -29,6 +28,7 @@ class AiAssistantService
             ]);
         } catch (\Exception $e) {
             Log::error('AI request failed', ['error' => $e->getMessage()]);
+
             return 'Sorry, I encountered an error processing your request. Please try again later.';
         }
 
@@ -227,7 +227,7 @@ class AiAssistantService
             'create_listing' => $this->listingTools->createListing($arguments),
             'update_listing' => $this->listingTools->updateListing($arguments),
             'delete_listing' => $this->listingTools->deleteListing((int) ($arguments['id'] ?? 0)),
-            default => ['success' => false, 'error' => 'Unknown tool: ' . $name],
+            default => ['success' => false, 'error' => 'Unknown tool: '.$name],
         };
     }
 

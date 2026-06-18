@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Cache;
 class ConversationContext
 {
     private const CACHE_PREFIX = 'telegram_conversation_';
+
     private const TTL_MINUTES = 30;
 
     public function getMessages(string $chatId): array
@@ -61,16 +62,16 @@ class ConversationContext
 
     public function setLastListingId(string $chatId, int $listingId): void
     {
-        Cache::put($this->key($chatId) . '_last_listing', $listingId, now()->addMinutes(self::TTL_MINUTES));
+        Cache::put($this->key($chatId).'_last_listing', $listingId, now()->addMinutes(self::TTL_MINUTES));
     }
 
     public function getLastListingId(string $chatId): ?int
     {
-        return Cache::get($this->key($chatId) . '_last_listing');
+        return Cache::get($this->key($chatId).'_last_listing');
     }
 
     private function key(string $chatId): string
     {
-        return self::CACHE_PREFIX . $chatId;
+        return self::CACHE_PREFIX.$chatId;
     }
 }

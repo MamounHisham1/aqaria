@@ -82,7 +82,7 @@ class ListingFactory extends Factory
 
         $imageCount = fake()->numberBetween(1, 5);
         $images = [];
-        $seed = fake()-> randomNumber(5);
+        $seed = fake()->randomNumber(5);
         for ($i = 1; $i <= $imageCount; $i++) {
             $images[] = "https://picsum.photos/seed/{$seed}{$i}/800/600";
         }
@@ -133,11 +133,11 @@ class ListingFactory extends Factory
             'listing_type' => $listingType,
             'city' => $city,
             'district' => $district,
-            'address' => fake()->streetAddress() . ', ' . $district . ', ' . $city,
+            'address' => fake()->streetAddress().', '.$district.', '.$city,
             'latitude' => fake()->latitude(22, 32),
             'longitude' => fake()->longitude(25, 36),
-            'contact_phone' => '01' . fake()->numberBetween(0, 2) . fake()->numerify('########'),
-            'contact_whatsapp' => '01' . fake()->numberBetween(0, 2) . fake()->numerify('########'),
+            'contact_phone' => '01'.fake()->numberBetween(0, 2).fake()->numerify('########'),
+            'contact_whatsapp' => '01'.fake()->numberBetween(0, 2).fake()->numerify('########'),
             'is_featured' => fake()->boolean(20),
             'is_active' => fake()->boolean(90),
             'images' => $images,
@@ -147,21 +147,21 @@ class ListingFactory extends Factory
 
     public function featured(): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'is_featured' => true,
         ]);
     }
 
     public function forSale(): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'listing_type' => 'sale',
         ]);
     }
 
     public function forRent(): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'listing_type' => 'rent',
         ]);
     }

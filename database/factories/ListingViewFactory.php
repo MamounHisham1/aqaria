@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Listing;
 use App\Models\ListingView;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -15,7 +16,7 @@ class ListingViewFactory extends Factory
     public function definition(): array
     {
         return [
-            'listing_id' => \App\Models\Listing::factory(),
+            'listing_id' => Listing::factory(),
             'visitor_id' => bin2hex(random_bytes(16)),
             'ip_address' => fake()->ipv4(),
             'user_agent' => fake()->userAgent(),
@@ -25,14 +26,14 @@ class ListingViewFactory extends Factory
 
     public function forListing(int $listingId): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'listing_id' => $listingId,
         ]);
     }
 
     public function byVisitor(string $visitorId): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'visitor_id' => $visitorId,
         ]);
     }
